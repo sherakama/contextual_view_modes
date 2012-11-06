@@ -1,0 +1,6 @@
+name = Contextual View Modes
+description = Creates the ability for authors to change view modes on nodes by context (module) conditions
+package = Hackery
+version = "7.x-1.0"
+core = 7.x
+files[] = contextual_view_modes.module

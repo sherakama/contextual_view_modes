@@ -1,0 +1,84 @@
+<?php
+/**
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ **/
+
+
+/**
+ * Implementation of hook_perm().
+ */
+function contextual_view_modes_perm() {
+  return array(
+    'administer contextual_view_modes',
+    'set contextual_view_modes_per_node'
+    );
+}
+
+
+/**
+ * Alters the build one more time to support view modes per node with contexts
+ * @param  $build  The build array that drupal_render() expects
+ */
+function contextual_view_modes_node_view_alter(&$build) {
+
+  // To avoid an endless loop do this v
+  static $call_once;
+  $call_once++;
+  if($call_once >= 2) { return; }
+
+  // Only work with nodes when on page view
+  $a0 = arg(0);
+  $a1 = arg(1);
+  if($a0 !== "node" || !is_numeric($a1)) { return; }
+
+  // Get current node
+  $node = $build['#node'];
+
+  // If v is not set then we want to run our version of ds_extras display switch
+  if(isset($_GET['v'])) { return; } // v is set. Dont eff with that
+  if(isset($node->cvw) && !count($node->cvw)) { return; } // no contextual view modes set
+
+  // Get all of the contexts that have a match
+  $contexts = context_active_contexts();
+
+  // Loop through each context and see if this node has a view mode assigned
+  // to a valid context
+  foreach($contexts as $context_name => $context) {
+   if(isset($node->cvw[$context_name]) && count($node->cvw[$context_name])) {
+      $node->ds_switch = $node->cvw[$context_name];
+      $build = node_view($node, $node->ds_switch);
+      return; // take only the first match
+    }
+  }
+
+}
+
+/**
+ * @param  $form  The form array
+ * @param $form_state  The form state
+ *
+ */
+
+function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_id) {
+
+  dpm($form);
+  // dpm($form_state);
+
+  $form['contextual_display'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Contextual Display settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'additional_settings',
+    '#weight' => 100,
+  );
+
+}
+
+
