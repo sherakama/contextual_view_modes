@@ -50,7 +50,7 @@ function contextual_view_modes_node_view_alter(&$build) {
   // Loop through each context and see if this node has a view mode assigned
   // to a valid context
   foreach($contexts as $context_name => $context) {
-   if(isset($node->cvw[$context_name]) && count($node->cvw[$context_name])) {
+   if(isset($node->cvw[$context_name]) && count($node->cvw[$context_name]) && $node->cvw[$context_name] !== "default") {
       $node->ds_switch = $node->cvw[$context_name];
       $build = node_view($node, $node->ds_switch);
       return; // take only the first match
