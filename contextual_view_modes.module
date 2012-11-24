@@ -1,6 +1,6 @@
 <?php
 /**
- *
+ * @file
  *
  *
  *
@@ -67,9 +67,6 @@ function contextual_view_modes_node_view_alter(&$build) {
 
 function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_id) {
 
-  dpm($form);
-  // dpm($form_state);
-
   $form['contextual_display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Contextual Display settings'),
@@ -79,6 +76,105 @@ function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_i
     '#weight' => 100,
   );
 
+  $contexts = array('default' => '-Default-');
+  $contexts += context_context_list();
+
+  // prettyfi the names
+  foreach($contexts as $key => $name) {
+    $contexts[$key] = ucfirst(str_replace('_'," ", $name));
+  }
+
+  $ds_modes = ds_entity_view_modes('node');
+
+  foreach($ds_modes as $key => $mode) {
+    $form['contextual_display']['contextop_'.$key] = array(
+      '#type' => 'select',
+      '#title' => t("Use ") . $mode['label'] . t(' when context:'),
+      '#options' => $contexts,
+    );
+  }
+
 }
 
+
+
+/**
+ *
+ */
+
+function contextual_view_modes_node_insert($node) {
+
+  $keys = ds_entity_view_modes('node');
+  foreach($keys as $k => $value) {
+    $keys[$k] = "contextop_" . $k;
+  }
+
+  $save = array();
+
+  foreach($keys as $k => $vkey) {
+    if(isset($node->{$vkey})) {
+      $save[$node->{$vkey}] = $k;
+    }
+  }
+
+  $record = array(
+    'nid' => $node->nid,
+    'vid' => $node->vid,
+    'context_data' => serialize($save),
+  );
+
+  drupal_write_record('contextual_view_modes', $record);
+
+}
+
+
+/**
+ *
+ */
+
+function contextual_view_modes_node_update($node) {
+
+  $keys = ds_entity_view_modes('node');
+  foreach($keys as $k => $value) {
+    $keys[$k] = "contextop_" . $k;
+  }
+
+  $save = array();
+
+  foreach($keys as $k => $vkey) {
+    if(isset($node->{$vkey})) {
+      $save[$node->{$vkey}] = $k;
+    }
+  }
+
+  $record = array(
+    'nid' => $node->nid,
+    'vid' => $node->vid,
+    'context_data' => serialize($save),
+  );
+
+  drupal_write_record('contextual_view_modes', $record, array('vid'));
+
+}
+
+/**
+ * Implements hook_node_load().
+ */
+function contextual_view_modes_node_load($nodes, $types) {
+
+  $vids = array();
+  foreach($nodes as $k => $node) {
+    $vids[] = $node->vid;
+  }
+
+   $result = db_query('SELECT nid, vid, context_data FROM {contextual_view_modes} WHERE vid IN(:vids)', array(':vids' => $vids));
+   foreach ($result as $record) {
+      $data = unserialize($record->context_data);
+      foreach($nodes as $k => $node) {
+        $node->cvw = $data;
+      }
+   }
+
+
+}
 
