@@ -94,12 +94,17 @@ function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_i
     );
   }
 
+ foreach($form['#node']->cvw as $context_name => $view_mode) {
+  $form['contextual_display']['contextop_'.$view_mode]["#default_value"] = $context_name;
+ }
+
+
 }
 
 
 
 /**
- *
+ * save the values on insert
  */
 
 function contextual_view_modes_node_insert($node) {
@@ -112,9 +117,7 @@ function contextual_view_modes_node_insert($node) {
   $save = array();
 
   foreach($keys as $k => $vkey) {
-    if(isset($node->{$vkey})) {
-      $save[$node->{$vkey}] = $k;
-    }
+    $save[$node->{$keys[$k]}] = $k;
   }
 
   $record = array(
@@ -129,7 +132,7 @@ function contextual_view_modes_node_insert($node) {
 
 
 /**
- *
+ * save the values on node update
  */
 
 function contextual_view_modes_node_update($node) {
@@ -139,12 +142,11 @@ function contextual_view_modes_node_update($node) {
     $keys[$k] = "contextop_" . $k;
   }
 
+
   $save = array();
 
   foreach($keys as $k => $vkey) {
-    if(isset($node->{$vkey})) {
-      $save[$node->{$vkey}] = $k;
-    }
+    $save[$node->{$keys[$k]}] = $k;
   }
 
   $record = array(
