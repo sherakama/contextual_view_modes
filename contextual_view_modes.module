@@ -94,10 +94,11 @@ function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_i
     );
   }
 
- foreach($form['#node']->cvw as $context_name => $view_mode) {
-  $form['contextual_display']['contextop_'.$view_mode]["#default_value"] = $context_name;
- }
-
+  if(isset($form['#node']->cvw)) {
+    foreach($form['#node']->cvw as $context_name => $view_mode) {
+      $form['contextual_display']['contextop_'.$view_mode]["#default_value"] = $context_name;
+    }
+  }
 
 }
 
