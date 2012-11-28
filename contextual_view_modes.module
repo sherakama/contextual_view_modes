@@ -156,7 +156,19 @@ function contextual_view_modes_node_update($node) {
     'context_data' => serialize($save),
   );
 
-  drupal_write_record('contextual_view_modes', $record, array('vid'));
+  // see if entry exists
+  $is_new = db_select('contextual_view_modes','cvm')
+              ->fields('cvm', array('vid'))
+              ->condition('vid', $node->vid)
+              ->execute()
+              ->fetchAssoc();
+
+  if(isset($is_new['vid'])) {
+    drupal_write_record('contextual_view_modes', $record, array('vid'));
+  }
+  else {
+    drupal_write_record('contextual_view_modes', $record);
+  }
 
 }
 

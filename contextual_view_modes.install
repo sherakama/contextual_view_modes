@@ -11,12 +11,12 @@ $schema['contextual_view_modes'] = array(
     // example (partial) specification for table "node"
     'description' => 'Contexual View Mode Settings DB.',
     'fields' => array(
-      'id' => array(
-        'description' => 'The primary identifier for a context view mode.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
+      // 'id' => array(
+      //   'description' => 'The primary identifier for a context view mode.',
+      //   'type' => 'serial',
+      //   'unsigned' => TRUE,
+      //   'not null' => TRUE,
+      // ),
       'vid' => array(
         'description' => 'The current {node}.nid version identifier.',
         'type' => 'int',
@@ -41,9 +41,9 @@ $schema['contextual_view_modes'] = array(
     ),
     'unique keys' => array(
       'nid_vid' => array('nid', 'vid'),
-      'vid' => array('vid'),
+//      'vid' => array('vid'),
     ),
-    'primary key' => array('id'),
+    'primary key' => array('vid'),
   );
   return $schema;
 
