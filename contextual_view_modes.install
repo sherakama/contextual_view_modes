@@ -1,46 +1,5 @@
 <?php
 
-
-  /**
-   * [contextual_view_modes_schema description]
-   * @return [type] [description]
-   */
-  function contextual_view_modes_schema() {
-
-    $schema['contextual_view_modes'] = array(
-      'description' => 'Contexual View Mode Settings DB.',
-      'fields' => array(
-        'vid' => array(
-          'description' => 'The current {node}.vid version identifier.',
-          'type' => 'int',
-          'unsigned' => TRUE,
-          'not null' => TRUE,
-          'default' => 0,
-        ),
-        'nid' => array(
-          'description' => 'The current {node_revision}.nid version identifier.',
-          'type' => 'int',
-          'unsigned' => TRUE,
-          'not null' => TRUE,
-          'default' => 0,
-        ),
-        'context_data' => array(
-          'description' => 'The array of settings for the node',
-          'type' => 'blob',
-          'size' => 'big',
-        ),
-      ),
-      'unique keys' => array(
-        'nid_vid' => array('nid', 'vid'),
-      ),
-      'primary key' => array('vid'),
-    );
-    return $schema;
-
-
-  }
-
-
   /**
    * Implements hook_field_schema().
    *
