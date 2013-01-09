@@ -1,51 +1,92 @@
 <?php
 
 
-/**
- * [contextual_view_modes_schema description]
- * @return [type] [description]
- */
-function contextual_view_modes_schema() {
+  /**
+   * [contextual_view_modes_schema description]
+   * @return [type] [description]
+   */
+  function contextual_view_modes_schema() {
 
-$schema['contextual_view_modes'] = array(
-    // example (partial) specification for table "node"
-    'description' => 'Contexual View Mode Settings DB.',
-    'fields' => array(
-      // 'id' => array(
-      //   'description' => 'The primary identifier for a context view mode.',
-      //   'type' => 'serial',
-      //   'unsigned' => TRUE,
-      //   'not null' => TRUE,
-      // ),
-      'vid' => array(
-        'description' => 'The current {node}.nid version identifier.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
+    $schema['contextual_view_modes'] = array(
+      'description' => 'Contexual View Mode Settings DB.',
+      'fields' => array(
+        'vid' => array(
+          'description' => 'The current {node}.vid version identifier.',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'nid' => array(
+          'description' => 'The current {node_revision}.nid version identifier.',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'context_data' => array(
+          'description' => 'The array of settings for the node',
+          'type' => 'blob',
+          'size' => 'big',
+        ),
       ),
-      'nid' => array(
-        'description' => 'The current {node_revision}.vid version identifier.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
+      'unique keys' => array(
+        'nid_vid' => array('nid', 'vid'),
       ),
-      'context_data' => array(
-        'description' => 'The array of settings for the node',
-        'type' => 'blob',
-        'size' => 'big',
-        // 'not null' => TRUE,
-        // 'default' => '',
-      ),
-    ),
-    'unique keys' => array(
-      'nid_vid' => array('nid', 'vid'),
-//      'vid' => array('vid'),
-    ),
-    'primary key' => array('vid'),
-  );
-  return $schema;
+      'primary key' => array('vid'),
+    );
+    return $schema;
 
 
-}
+  }
+
+
+  /**
+   * Implements hook_field_schema().
+   *
+   * Defines the database schema of the field, using the format used by the
+   * Schema API.
+   *
+   */
+  function contextual_view_modes_field_schema($field) {
+
+
+    $schema = array(
+      'columns' => array(
+        'view_mode' => array(
+          'description' => 'The view mode to use when context validates',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ),
+        'context' => array(
+          'description' => 'The context to authenticate against',
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+        ),
+      ),
+      'indexes' => array(
+        'view_mode' => array('view_mode'),
+        'context' => array('context'),
+        'view_context' => array('view_mode', 'context'),
+      ),
+      'foreign keys' => array(
+        'context' => array(
+          'table' => 'context',
+          'columns' => array(
+            'context' => 'name',
+          ),
+        ),
+        'view_mode' => array(
+          'table' => 'ds_view_modes',
+          'columns' => array(
+            'view_mode' => 'view_mode'
+          ),
+        ),
+      ),
+    );
+
+    return $schema;
+
+  }

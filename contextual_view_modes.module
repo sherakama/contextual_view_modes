@@ -1,11 +1,12 @@
 <?php
 /**
  * @file
- *
- *
- *
- *
- *
+ * @author - sherakama
+ * Todo::::
+ *     1. Create real fields
+ *     2. Create configuration form for enabling content types
+ *     3. Turn select fields into multiple value fields
+ *     4. Create global content type default settings
  *
  **/
 
@@ -13,12 +14,296 @@
 /**
  * Implementation of hook_perm().
  */
-function contextual_view_modes_perm() {
+function contextual_view_modes_permission() {
   return array(
-    'administer contextual_view_modes',
-    'set contextual_view_modes_per_node'
+    'administer cvm settings' => array(
+      'title' => t('Administer Contextual View Modes'),
+      'description' => t('Allow administration of contextual view mode settings'),
+      ),
+    'set view modes per node' => array(
+        'title' => t('Contextual View Modes Per Node'),
+        'description' => t('Allow changing/setting contextual view mode per node'),
+      )
     );
 }
+
+
+/**
+ * Implements hook_field_info().
+ */
+function contextual_view_modes_field_info() {
+  return array(
+    'contextual_view_modes_cvm' => array(
+      'label' => t('Contextual View Modes'),
+      'description' => t('Allows users to select a view mode and a context to apply it on'),
+      'settings' => array(),
+      'instance_settings' => array(),
+      'default_widget' => 'contextual_view_modes_widget',
+      'default_formatter' => 'contextual_view_modes_no_output',
+    ),
+  );
+}
+
+
+/**
+ * Implements hook_field_validate().
+ */
+function contextual_view_modes_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+  foreach ($items as $delta => $item) {
+    if (!empty($item['view_mode'])) {
+      // @TODO: validation
+
+       // $errors[$field['field_name']][$langcode][$delta][] = array(
+       //    'error' => 'contextual_view_modes_invalid',
+       //    'message' => t('Duplicate!'),
+       //  );
+    }
+    if (!empty($item['context'])) {
+      // @TODO: validation
+
+       // $errors[$field['field_name']][$langcode][$delta][] = array(
+       //    'error' => 'contextual_view_modes_invalid',
+       //    'message' => t('Duplicate!'),
+       //  );
+    }
+  }
+}
+
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function contextual_view_modes_field_is_empty($item, $field) {
+
+  if (empty($item['context']) || $item['context'] == "none") {
+    return TRUE;
+  }
+
+  if (empty($item['view_mode']) || $item['view_mode'] == "none") {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+
+/**
+ * Implements hook_field_formatter_info().
+ *
+ * We need to tell Drupal that we have a formatter for this field
+ *
+ * @see field_example_field_formatter_view()
+ */
+function contextual_view_modes_field_formatter_info() {
+  return array(
+    'contextual_view_modes_no_output' => array(
+      'label' => t('No Markup'),
+      'field types' => array('contextual_view_modes_cvm'),
+    ),
+    'contextual_view_modes_plain_text' => array(
+      'label' => t('Plain Text'),
+      'field types' => array('contextual_view_modes_cvm'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function contextual_view_modes_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+    case 'contextual_view_modes_no_output':
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+         // '#theme' => 'contextual_view_modes_theme_cvm_field',
+          '#data' => $item['context'],
+          '#markup' => contextual_view_modes_no_output_markup($entity_type, $entity, $field, $instance, $langcode, $items, $display),
+         // '#some_setting' => $settings['some_settig'],
+        );
+      }
+      break;
+
+    case 'contextual_view_modes_plain_text':
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+         // '#theme' => 'contextual_view_modes_theme_cvm_field',
+          '#data' => $item['view_mode'],
+          '#markup' => contextual_view_modes_plain_text_markup($entity_type, $entity, $field, $instance, $langcode, $items, $display),
+         // '#some_setting' => $settings['some_settig'],
+        );
+      }
+      break;
+
+  }
+
+  return $element;
+}
+
+
+/**
+ * Returns the output for the field formatter
+ * @param  [type] $entity_type [description]
+ * @param  [type] $entity      [description]
+ * @param  [type] $field       [description]
+ * @param  [type] $instance    [description]
+ * @param  [type] $langcode    [description]
+ * @param  [type] $items       [description]
+ * @param  [type] $display     [description]
+ * @return string of HTML markup
+ */
+function contextual_view_modes_no_output_markup($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $output = "";
+  $output .= "<p>NO MARKUP</p>";
+  return $output;
+}
+
+/**
+ * Returns the output for the field formatter
+ * @param  [type] $entity_type [description]
+ * @param  [type] $entity      [description]
+ * @param  [type] $field       [description]
+ * @param  [type] $instance    [description]
+ * @param  [type] $langcode    [description]
+ * @param  [type] $items       [description]
+ * @param  [type] $display     [description]
+ * @return string of HTML markup
+ */
+function contextual_view_modes_plain_text_markup($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $output = "";
+  $output .= "<p>PLAIN TEXT</p>";
+  return $output;
+}
+
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function contextual_view_modes_field_widget_info() {
+    return array(
+    'contextual_view_modes_picker' => array(
+      'label' => t('Contextual View Modes Picker'),
+      'field types' => array('contextual_view_modes_cvm'),
+      'settings' => array(
+        'progress_indicator' => 'throbber',
+      ),
+      'behaviors' => array(
+        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+        'default value' => FIELD_BEHAVIOR_NONE,
+      ),
+    ),
+  );
+}
+
+/**
+ * [contextual_view_modes_field_widget_form description]
+ * @param  [type] $form       [description]
+ * @param  [type] $form_state [description]
+ * @param  [type] $field      [description]
+ * @param  [type] $instance   [description]
+ * @param  [type] $langcode   [description]
+ * @param  [type] $items      [description]
+ * @param  [type] $delta      [description]
+ * @param  [type] $element    [description]
+ * @return [type]
+ */
+function contextual_view_modes_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+
+  // Get the available contexts for use in a select field
+  $contexts = array('none' => '- Pick a context -');
+  $contexts += context_context_list();
+  foreach($contexts as $key => $name) {
+    $contexts[$key] = ucwords(str_replace('_'," ", $name));
+  }
+
+  // Get the available view modes for use in a select field
+  $ds_modes = ds_entity_view_modes('node');
+  $ds_modes_formatted = array('none' => '- None -');
+  foreach($ds_modes as $name => $values) {
+    $ds_modes_formatted[$name] = ucwords(str_replace('_'," ", $values['label']));
+  }
+
+  //  //////////////////////////////////////////////////////////////////////////
+
+  $default_context = isset($items[$delta]['context']) ? $items[$delta]['context'] : '';
+  $default_view_mode = isset($items[$delta]['view_mode']) ? $items[$delta]['view_mode'] : '';
+  $widget = $element;
+  $widget['#delta'] = $delta;
+
+  $widget += array(
+    '#type' => 'fieldset',
+    '#element_validate' => array('contextual_view_modes_picker_validate'),
+    '#delta' => $delta,
+    '#attached' => array(
+      'css' => array(drupal_get_path('module', 'contextual_view_modes') . '/contextual_view_modes.css'),
+    ),
+  );
+
+  $widget['context'] = array(
+    '#type' => 'select',
+    '#title' => t("When this context: "),
+    '#options' => $contexts,
+    '#default_value' => $default_context,
+  );
+
+  $widget['view_mode'] = array(
+    '#type' => 'select',
+    '#title' => t("Use this view mode: "),
+    '#options' => $ds_modes_formatted,
+    '#default_value' => $default_view_mode,
+  );
+
+  $element = $widget;
+  return $element;
+}
+
+/**
+ * [contextual_view_modes_picker_validate description]
+ * @param  [type] $element       [description]
+ * @param  [type] $form_state [description]
+ * @return [type]             [description]
+ */
+function contextual_view_modes_picker_validate($element, &$form_state) {
+  $delta = $element['#delta']; // TODO: Isn't there a better way to find out which element?
+  $field = $form_state['field'][$element['#field_name']][$element['#language']]['field'];
+  $field_name = $field['field_name'];
+  if (isset($form_state['values'][$field_name][$element['#language']][$delta]['cvm'])) {
+    // TODO: Check to see if there are multiple settings for a context...
+  }
+}
+
+/**
+ * Implements hook_field_widget_error().
+ *
+ * hook_field_widget_error() lets us figure out what to do with errors
+ * we might have generated in hook_field_validate(). Generally, we'll just
+ * call form_error().
+ *
+ * @see field_example_field_validate()
+ * @see form_error()
+ */
+function contextual_view_modes_field_widget_error($element, $error, $form, &$form_state) {
+  switch ($error['error']) {
+    case 'contextual_view_modes_invalid':
+      form_error($element, $error['message']);
+      break;
+  }
+}
+
+
+
+
+
+
+
+// /////////////////////////////////////////////////////////////////////////////
+// OLD CODE BELOW
+// /////////////////////////////////////////////////////////////////////////////
+
+
+
 
 
 /**
@@ -42,7 +327,6 @@ function contextual_view_modes_node_view_alter(&$build) {
 
   // If v is not set then we want to run our version of ds_extras display switch
   if(isset($_GET['v'])) { return; } // v is set. Dont eff with that
-  if(isset($node->cvw) && !count($node->cvw)) { return; } // no contextual view modes set
 
   // Get all of the contexts that have a match
   $contexts = context_active_contexts();
@@ -50,11 +334,11 @@ function contextual_view_modes_node_view_alter(&$build) {
   // Loop through each context and see if this node has a view mode assigned
   // to a valid context
   foreach($contexts as $context_name => $context) {
-   if(isset($node->cvw[$context_name]) && count($node->cvw[$context_name]) && $node->cvw[$context_name] !== "default") {
-      $node->ds_switch = $node->cvw[$context_name];
-      $build = node_view($node, $node->ds_switch);
-      return; // take only the first match
-    }
+   // if(isset($node->cvw[$context_name]) && count($node->cvw[$context_name]) && $node->cvw[$context_name] !== "default") {
+   //    $node->ds_switch = $node->cvw[$context_name];
+   //    $build = node_view($node, $node->ds_switch);
+   //    return; // take only the first match
+   //  }
   }
 
 }
@@ -67,36 +351,24 @@ function contextual_view_modes_node_view_alter(&$build) {
 
 function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_id) {
 
+  $lang = $form['language']['#value'];
+
   $form['contextual_display'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Contextual Display settings'),
+    '#title' => t('Contextual View Modes Settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
     '#weight' => 100,
   );
 
-  $contexts = array('default' => '-Default-');
-  $contexts += context_context_list();
+  // Move all contextual view mode fields into the group
+  $fields = $form_state['field'];
 
-  // prettyfi the names
-  foreach($contexts as $key => $name) {
-    $contexts[$key] = ucfirst(str_replace('_'," ", $name));
-  }
-
-  $ds_modes = ds_entity_view_modes('node');
-
-  foreach($ds_modes as $key => $mode) {
-    $form['contextual_display']['contextop_'.$key] = array(
-      '#type' => 'select',
-      '#title' => t("Use ") . $mode['label'] . t(' when context:'),
-      '#options' => $contexts,
-    );
-  }
-
-  if(isset($form['#node']->cvw)) {
-    foreach($form['#node']->cvw as $context_name => $view_mode) {
-      $form['contextual_display']['contextop_'.$view_mode]["#default_value"] = $context_name;
+  foreach($fields as $field_name => $settings) {
+    if($settings[$lang]['field']['type'] == "contextual_view_modes_cvm") {
+      $form['contextual_display'][$field_name] = $form[$field_name];
+      unset($form[$field_name]);
     }
   }
 
@@ -104,92 +376,5 @@ function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_i
 
 
 
-/**
- * save the values on insert
- */
 
-function contextual_view_modes_node_insert($node) {
-
-  $keys = ds_entity_view_modes('node');
-  foreach($keys as $k => $value) {
-    $keys[$k] = "contextop_" . $k;
-  }
-
-  $save = array();
-
-  foreach($keys as $k => $vkey) {
-    $save[$node->{$keys[$k]}] = $k;
-  }
-
-  $record = array(
-    'nid' => $node->nid,
-    'vid' => $node->vid,
-    'context_data' => serialize($save),
-  );
-
-  drupal_write_record('contextual_view_modes', $record);
-
-}
-
-
-/**
- * save the values on node update
- */
-
-function contextual_view_modes_node_update($node) {
-
-  $keys = ds_entity_view_modes('node');
-  foreach($keys as $k => $value) {
-    $keys[$k] = "contextop_" . $k;
-  }
-
-
-  $save = array();
-
-  foreach($keys as $k => $vkey) {
-    $save[$node->{$keys[$k]}] = $k;
-  }
-
-  $record = array(
-    'nid' => $node->nid,
-    'vid' => $node->vid,
-    'context_data' => serialize($save),
-  );
-
-  // see if entry exists
-  $is_new = db_select('contextual_view_modes','cvm')
-              ->fields('cvm', array('vid'))
-              ->condition('vid', $node->vid)
-              ->execute()
-              ->fetchAssoc();
-
-  if(isset($is_new['vid'])) {
-    drupal_write_record('contextual_view_modes', $record, array('vid'));
-  }
-  else {
-    drupal_write_record('contextual_view_modes', $record);
-  }
-
-}
-
-/**
- * Implements hook_node_load().
- */
-function contextual_view_modes_node_load($nodes, $types) {
-
-  $vids = array();
-  foreach($nodes as $k => $node) {
-    $vids[] = $node->vid;
-  }
-
-   $result = db_query('SELECT nid, vid, context_data FROM {contextual_view_modes} WHERE vid IN(:vids)', array(':vids' => $vids));
-   foreach ($result as $record) {
-      $data = unserialize($record->context_data);
-      foreach($nodes as $k => $node) {
-        $node->cvw = $data;
-      }
-   }
-
-
-}
 
