@@ -347,6 +347,31 @@ function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_i
     '#weight' => 100,
   );
 
+
+   // If there are global settings for this content type lets show the user here.
+  $global_cvm = variable_get('cvm_global_content_type_modes', array());
+  if (isset($global_cvm[$type])) {
+    // There are global settings for this content type. Lets show the user.
+
+    $data = array();
+    foreach ($global_cvm[$type] as $context_name => $vm) {
+      $data[] = t('The view mode: !vm is set for context: !c', array('!vm' => "<strong>" . $vm . "</strong>", "!c" => "<strong>" . $context_name . "</strong>"));
+    }
+
+    $form['contextual_display']['showntell'] = array(
+      '#markup' => theme_item_list(array(
+        'items' => $data,
+        'type' => 'ul',
+        'title' => t('Enabled Global Contextual View Modes'),
+        'attributes' => array()
+        )
+      ),
+    );
+
+  }
+
+
+
   // Move all contextual view mode fields into the group.
   $fields = $form_state['field'];
 
@@ -401,6 +426,11 @@ function contextual_view_modes_node_view_alter(&$build) {
   // to a valid context.
   foreach ($contexts as $context_name => $context) {
 
+    // Avoid php errors...
+    if (empty($node->{CVM_FIELD_NAME}[$node->language])) {
+      continue;
+    }
+
     foreach ($node->{CVM_FIELD_NAME}[$node->language] as $k => $values) {
       if ($values['context'] == $context_name) {
         $node->ds_switch = $context_name;
@@ -409,6 +439,24 @@ function contextual_view_modes_node_view_alter(&$build) {
         return;
       }
     }
+  }
+
+  // If we get here then there has not been a setting for this specific node.
+  // Check to see if there is a global context we need to do.
+
+  $global_cvm = variable_get('cvm_global_content_type_modes', array());
+  if (isset($global_cvm[$node->type])) {
+    // We found settings...
+
+    foreach ($contexts as $context_name => $context) {
+      if (isset($global_cvm[$node->type][$context_name])) {
+        $node->ds_switch = $global_cvm[$node->type][$context_name];
+        $build = node_view($node, $node->ds_switch);
+        // Take only the first match.
+        return;
+      }
+    }
+
   }
 
 }
