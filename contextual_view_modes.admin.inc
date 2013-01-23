@@ -71,7 +71,7 @@ function contextual_view_modes_settings($form, &$form_state) {
     );
 
     foreach ($contexts as $context_name => $context) {
-      $form[$name]['cvmglobal_' . $name . '_' . $context_name] = array(
+      $form[$name]['cvmglobal___' . $name . '___' . $context_name] = array(
         '#type' => 'select',
         '#title' => 'Default view mode for context: ' . $context,
         '#options' => $ds_modes_formatted,
@@ -182,7 +182,7 @@ function contextual_view_modes_settings_submit($form, &$form_state) {
 
   $global_cvm = array();
   foreach ($values as $field_name => $value) {
-    if (substr($field_name, 0, 10) == "cvmglobal_") {
+    if (substr($field_name, 0, 11) == "cvmglobal___") {
 
       // Remove from form_state.
       unset($form_state['values'][$field_name]);
@@ -192,11 +192,11 @@ function contextual_view_modes_settings_submit($form, &$form_state) {
         continue;
       }
 
-      $xp = explode("_", $field_name);
+      $xp = explode("___", $field_name);
       unset($xp[0]); // Dont need this.
       $content_type = $xp[1];
       unset($xp[1]);
-      $context_name = implode("_", $xp);
+      $context_name = implode("___", $xp);
 
       // If field was disabled we need to not store it.
       if (array_key_exists($content_type, $disabled_types)) {
