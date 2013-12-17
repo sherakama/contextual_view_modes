@@ -182,7 +182,7 @@ function contextual_view_modes_settings_submit($form, &$form_state) {
 
   $global_cvm = array();
   foreach ($values as $field_name => $value) {
-    if (substr($field_name, 0, 11) == "cvmglobal___") {
+    if (substr($field_name, 0, 12) == "cvmglobal___") {
 
       // Remove from form_state.
       unset($form_state['values'][$field_name]);
