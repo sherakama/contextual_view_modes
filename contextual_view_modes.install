@@ -46,7 +46,7 @@ function contextual_view_modes_update_7101(&$sandbox) {
 }
 
 /**
- * Implements hook_update().
+ * Please back up your database before running as this does some pretty shady stuff.
  */
 function contextual_view_modes_update_7102(&$sandbox) {
 
