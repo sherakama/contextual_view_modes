@@ -10,3 +10,4 @@ files[] = contextual_view_modes.admin.inc
 dependencies[] = "context"
 dependencies[] = "ds"
 dependencies[] = "ds_extras"
+dependencies[] = "cvm_field"

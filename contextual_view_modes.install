@@ -1,65 +1,48 @@
 <?php
 
+/**
+ * Implements hook_enable().
+ * Create a field for use later
+ */
+function contextual_view_modes_install() {
 
-  /**
-   * Implements hook_field_schema().
-   *
-   * Defines the database schema of the field, using the format used by the
-   * Schema API.
-   *
-   */
-  function contextual_view_modes_field_schema($field) {
+}
 
+/**
+ * Implements hook_disable().
+ */
+function contextual_view_modes_disable() {
+  drupal_set_message('contextual view modes has been disabled. '. l('Uninstall', 'admin/modules/uninstall') . ' module to remove all field data then disable and uninstall contextual view modes field module.');
+}
 
-    $schema = array(
-      'columns' => array(
-        'view_mode' => array(
-          'description' => 'The view mode to use when context validates',
-          'type' => 'varchar',
-          'length' => 255,
-          'not null' => TRUE,
-        ),
-        'context' => array(
-          'description' => 'The context to authenticate against',
-          'type' => 'varchar',
-          'length' => 255,
-          'not null' => TRUE,
-        ),
-      ),
-      'indexes' => array(
-        'view_mode' => array('view_mode'),
-        'context' => array('context'),
-        'view_context' => array('view_mode', 'context'),
-      ),
-      'foreign keys' => array(
-        'context' => array(
-          'table' => 'context',
-          'columns' => array(
-            'context' => 'name',
-          ),
-        ),
-        'view_mode' => array(
-          'table' => 'ds_view_modes',
-          'columns' => array(
-            'view_mode' => 'view_mode'
-          ),
-        ),
-      ),
-    );
+/**
+ * Implements hook_uninstall().
+ */
+function contextual_view_modes_uninstall() {
 
-    return $schema;
+  $node_types = variable_get('cvm_global_content_type_modes', array());
 
+  foreach ($node_types as $k => $v) {
+    $instance = field_read_instance('node', CVM_FIELD_NAME, $k);
+    field_delete_instance($instance, TRUE);
   }
 
-  /**
-   * Implements hook_update().
-   */
-  function contextual_view_modes_update_7101(&$sandbox) {
-    db_update('system')
-      ->fields(array(
-        'weight' => 100,
-        )
+  field_delete_field(CVM_FIELD_NAME);
+  field_purge_batch(10);
+
+}
+
+/**
+ * Implements hook_update().
+ */
+function contextual_view_modes_update_7101(&$sandbox) {
+  db_update('system')
+    ->fields(array(
+      'weight' => 100,
       )
-      ->condition('name', 'contextual_view_modes')
-      ->execute();;
-  }
+    )
+    ->condition('name', 'contextual_view_modes')
+    ->execute();;
+}
+
+

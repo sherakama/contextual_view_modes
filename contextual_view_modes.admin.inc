@@ -235,7 +235,7 @@ function _get_cvm_field_instance($bundle) {
   $ret['bundle'] = $bundle;
   $ret['field_name'] = CVM_FIELD_NAME;
   $ret['label'] = t('Contextual View Mode');
-  $ret['widget']['type'] = "contextual_view_modes_picker";
+  $ret['widget']['type'] = "cvm_field_picker";
   $ret['display']['default']['type'] = "hidden";
   $ret['display']['teaser']['type'] = "hidden";
 

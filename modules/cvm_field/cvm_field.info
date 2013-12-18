@@ -1,0 +1,11 @@
+name = Contextual View Modes Field
+description = CVM field definition
+package = Context
+version = "7.x-1.0"
+core = 7.x
+files[] = cvm_field.module
+files[] = cvm_field.install
+files[] = cvm_field.admin.inc
+
+dependencies[] = "field"
+
