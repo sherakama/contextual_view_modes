@@ -114,9 +114,9 @@ function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_i
  */
 function contextual_view_modes_node_view_alter(&$build) {
 
- if (module_exists('context_mobile_detect')) {
-   context_mobile_detect_context_page_condition();
- }
+  if (module_exists('context_mobile_detect')) {
+    context_mobile_detect_context_page_condition();
+  }
 
   // To avoid an endless loop do this vvvvvv.
   static $call_once;
