@@ -66,6 +66,7 @@ function contextual_view_modes_form_node_form_alter(&$form, $form_state, $form_i
     '#title' => t('Contextual View Modes Settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+    '#access' => user_access('set view modes per node'),
     '#group' => 'additional_settings',
     '#weight' => 100,
   );
