@@ -119,13 +119,6 @@ function contextual_view_modes_node_view_alter(&$build) {
     context_mobile_detect_context_page_condition();
   }
 
-  // To avoid an endless loop do this vvvvvv.
-  static $call_once;
-  $call_once++;
-  if ($call_once >= 2) {
-    return;
-  }
-
   // Only work with nodes when on page view.
   $a0 = arg(0);
   $a1 = arg(1);
@@ -135,6 +128,17 @@ function contextual_view_modes_node_view_alter(&$build) {
 
   // Get current node.
   $node = $build['#node'];
+
+  // Skip if this is a node reference field, and not the main node.
+  if ($node->nid != $a1) {
+    return;
+  }
+  // To avoid an endless loop do this vvvvvv.
+  static $call_once;
+  $call_once++;
+  if ($call_once >= 2) {
+    return;
+  }
 
   // If v is not set then we want to run our version of ds_extras display switch.
   if (isset($_GET['v'])) {
