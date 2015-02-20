@@ -40,13 +40,13 @@ function cvm_field_field_schema($field) {
       'view_mode' => array(
         'description' => 'The view mode to use when context validates',
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 128,
         'not null' => TRUE,
       ),
       'context' => array(
         'description' => 'The context to authenticate against',
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 128,
         'not null' => TRUE,
       ),
     ),
