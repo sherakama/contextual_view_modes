@@ -12,23 +12,12 @@ function contextual_view_modes_install() {
  * Implements hook_disable().
  */
 function contextual_view_modes_disable() {
-  drupal_set_message('contextual view modes has been disabled. '. l('Uninstall', 'admin/modules/uninstall') . ' module to remove all field data then disable and uninstall contextual view modes field module.');
 }
 
 /**
  * Implements hook_uninstall().
  */
 function contextual_view_modes_uninstall() {
-
-  $node_types = variable_get('cvm_global_content_type_modes', array());
-
-  foreach ($node_types as $k => $v) {
-    $instance = field_read_instance('node', CVM_FIELD_NAME, $k);
-    field_delete_instance($instance, TRUE);
-  }
-
-  field_delete_field(CVM_FIELD_NAME);
-  field_purge_batch(10);
 
 }
 
@@ -87,22 +76,8 @@ function contextual_view_modes_update_7102(&$sandbox) {
 }
 
 /**
- * Implements hook_requirements().
+ * Implements hook_update().
  */
-function contextual_view_modes_requirements($phase) {
-  $requirements = array();
-
-  if ($phase == 'runtime') {
-    if (!module_exists('cvm_field')) {
-      if (!module_enable(array('cvm_field'))) {
-        $requirements['cvm_field'] = array(
-          'title' => t('CVM Field Module Missing'),
-          'value' => 'Please find and enable the cvm_field module',
-          'severity' => REQUIREMENT_ERROR,
-        );
-      }
-    }
-  }
-
-  return $requirements;
+function contextual_view_modes_update_7200($node) {
+  // @Todo: provide upgrade path from 1.x to 2.x
 }
