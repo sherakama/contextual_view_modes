@@ -167,7 +167,7 @@ function contextual_view_modes_node_view_alter(&$build) {
 
     foreach ($node->{CVM_FIELD_NAME}[$node->language] as $k => $values) {
       if ($values['context'] == $context_name) {
-        $node->ds_switch = $context_name;
+        $node->ds_switch = $values['view_mode'];
         $build = node_view($node, $node->ds_switch);
         // Take only the first match.
         return;
