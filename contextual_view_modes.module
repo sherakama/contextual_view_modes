@@ -319,9 +319,7 @@ function contextual_view_modes_get_view_mode_options($entity_type = NULL) {
 function contextual_view_modes_get_active_contexts() {
 
   // To ensure these contexts get evaluated we need to call this directly.
-  if (module_exists('context_mobile_detect')) {
-    context_mobile_detect_context_page_condition();
-  }
+  module_invoke_all('context_page_condition');
 
   // Get all of the contexts that have are active.
   return context_active_contexts();
