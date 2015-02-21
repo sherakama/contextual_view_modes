@@ -21,8 +21,12 @@ function contextual_view_modes_settings_form($form, &$form_state) {
   $settings = variable_get('contextual_view_modes_global', array());
 
   $form['#attached']['css'][] = drupal_get_path('module', 'contextual_view_modes') . "/css/contextual_view_modes.admin.css";
-  $form['description']['#markup'] = t("Use the following form to set the global contextual view modes per entity and bundle. Individual entity settings can be created on the entity's edit form.");
+  $form['description']['#markup'] = "";
+  $d = &$form['description']['#markup'];
 
+  $d .= "<h3>" . t("Site wide entity contextual view modes") . "</h3>";
+  $d .= "<p>" . t("This form allows you to configure contextual view modes for each entity and bundle on your website. These settings are applied across all instances of the entity type.") . "</p>";
+  $d .= "<p>" . t("For more information please see the !help.", array('!help' => l("help page", 'admin/help'))) . "</p>";
 
   foreach ($entity_info as $entity_type => $info) {
 
@@ -63,21 +67,21 @@ function contextual_view_modes_settings_form($form, &$form_state) {
 
       $form['entity_fieldset_' . $entity_type]['container'][$delta]["group"]['bundle'] = array(
         '#type' => 'select',
-        '#title' => 'Bundle',
+        '#title' => 'Type of content',
         '#options' => $bundle_options,
         '#default_value' => isset($settings[$entity_type][$delta]['bundle']) ? $settings[$entity_type][$delta]['bundle'] : 'none',
       );
 
       $form['entity_fieldset_' . $entity_type]['container'][$delta]["group"]['context'] = array(
         '#type' => 'select',
-        '#title' => 'Context',
+        '#title' => 'Context to evaluate',
         '#options' => $context_options,
         '#default_value' => isset($settings[$entity_type][$delta]['context']) ? $settings[$entity_type][$delta]['context'] : 'none',
       );
 
       $form['entity_fieldset_' . $entity_type]['container'][$delta]["group"]['view_mode'] = array(
         '#type' => 'select',
-        '#title' => 'View mode',
+        '#title' => 'View mode to display',
         '#options' => $view_mode_options,
         '#default_value' => isset($settings[$entity_type][$delta]['view_mode']) ? $settings[$entity_type][$delta]['view_mode'] : 'none',
       );
