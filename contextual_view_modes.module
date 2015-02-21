@@ -63,11 +63,16 @@ function contextual_view_modes_menu() {
  */
 function contextual_view_modes_entity_view_alter(&$build, $type) {
 
-  $view_mode = FALSE;
+  // We do not support comments at this time.
+  if ($type == "comment") {
+    return;
+  }
 
+  $view_mode = FALSE;
   // Don't want to cause infinite loops nor do we want extra processing.
   $static = &drupal_static(__FUNCTION__, array());
   $md5 = md5(serialize($build));
+
   if (in_array($md5, $static)) {
     return;
   }
@@ -88,6 +93,11 @@ function contextual_view_modes_entity_view_alter(&$build, $type) {
 
   // We are going to need this to continue.
   $entity = contextual_view_modes_get_entity_from_build_array($build);
+
+  // If we don't find an entity then we just stop.
+  if (!$entity) {
+    return;
+  }
 
   // Check to see if there is a individual entity setting.
   $view_mode = contextual_view_modes_evaluate_individual_options($entity, $type);
@@ -151,11 +161,15 @@ function contextual_view_modes_evaluate_global_options($entity, $type) {
 
   $settings = variable_get('contextual_view_modes_global', array());
   $contexts = contextual_view_modes_get_active_contexts();
+  $keys = array_keys($contexts);
+
+  // Not valid.
+  if (!isset($settings[$type])) {
+    return;
+  }
 
   // Loop through each context and see if this entity has a view mode assigned
   // to a valid context.
-  $keys = array_keys($contexts);
-
   foreach ($settings[$type] as $delta => $values) {
     if (in_array($values['context'], $keys)) {
       return $values['view_mode'];
@@ -193,8 +207,8 @@ function contextual_view_modes_get_entity_from_build_array($build = array()) {
   }
 
   // Because users are special.
-  elseif (isset($build['#user'])) {
-    $entity = $build['#user'];
+  elseif (isset($build['#account'])) {
+    $entity = $build['#account'];
   }
 
   return $entity;
@@ -213,6 +227,11 @@ function contextual_view_modes_get_entity_from_build_array($build = array()) {
  *   True if the entity is a valid entity and has settings to run.
  */
 function contextual_view_modes_is_valid_entity($entity, $entity_type) {
+
+  // We do not support comments at this time.
+  if ($entity_type == "comment") {
+    return FALSE;
+  }
 
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
@@ -281,6 +300,12 @@ function contextual_view_modes_get_view_mode_options($entity_type = NULL) {
   $view_modes_formatted = array('none' => '- None -');
   $view_modes_formatted['default'] = 'Default';
   foreach ($entity_info['view modes'] as $name => $values) {
+
+    // @Todo: allow this to work.
+    if ($name == "rss") {
+      continue;
+    }
+
     $view_modes_formatted[$name] = ucwords(str_replace('_', " ", $values['label']));
   }
 

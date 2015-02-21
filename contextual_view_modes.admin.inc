@@ -14,6 +14,9 @@
 function contextual_view_modes_settings_form($form, &$form_state) {
 
   $entity_info = entity_get_info();
+  unset($entity_info['taxonomy_vocabulary']);
+  unset($entity_info['comment']);
+
   $context_options = contextual_view_modes_get_context_options();
   $settings = variable_get('contextual_view_modes_global', array());
 
