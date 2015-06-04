@@ -20,7 +20,12 @@ function contextual_view_modes_help($path, $arg) {
       $help .= "<p>" . t("Expand entity type to reveal configuration options. For example, if you click on node the field will expand to show you the options available.") . "</p>";
       $help .= "<p>" . t("Select type. Choose the context type or bundle type you want to change the view mode of. For example, under nodes you can select article.") . "</p>";
       $help .= "<p>" . t("Select context. Choose a context from the drop down select options. For example, if you created an anonymous user context, the name of that context should appear in the drop down.") . "</p>";
-
+      $help .= "<p>" . t("") . "</p>";
+      $help .= "<p>" . t("") . "</p>";
+      $help .= "<p>" . t("") . "</p>";
+      $help .= "<p>" . t("") . "</p>";
+      $help .= "<p>" . t("") . "</p>";
+      $help .= "<p>" . t("") . "</p>";
       return $help;
   }
 }

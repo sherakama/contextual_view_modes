@@ -129,6 +129,53 @@ function contextual_view_modes_settings_add_nuther($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
+/**
+ * [contextual_view_modes_settings_form_submit description]
+ * @param  [type] $form        [description]
+ * @param  [type] &$form_state [description]
+ * @return [type]              [description]
+ */
+function contextual_view_modes_settings_form_validate($form, &$form_state) {
+
+  $values = $form_state['values'];
+  $entity_info = entity_get_info();
+
+  foreach ($entity_info as $entity_type => $info) {
+
+    if (!isset($values['entity_fieldset_' . $entity_type])) {
+      continue;
+    }
+
+    // Lets store the values.
+    foreach ($values['entity_fieldset_' . $entity_type]['container'] as $index => $group) {
+
+
+      $entries = array_values($group['group']);
+      $uniq = array_diff($entries, array_diff_assoc($entries, array_unique($entries)));
+      sort($uniq);
+
+      // We need all three values to not be 'none' but skip if all 3 == none.
+      if (empty($uniq)) {
+        continue;
+      }
+
+      if (is_array($uniq) && count($uniq) == 1 && $uniq[0] == "none") {
+        continue;
+      }
+
+      // Check for the none option.
+      if (in_array('none', $entries)) {
+        drupal_set_message("All values must be set.", 'error', 1);
+        form_set_error('entity_fieldset_' . $entity_type . '][container][' . $index . '][group][bundle', "");
+        form_set_error('entity_fieldset_' . $entity_type . '][container][' . $index . '][group][view_mode', "");
+        form_set_error('entity_fieldset_' . $entity_type . '][container][' . $index . '][group][context', "");
+      }
+
+    }
+
+  }
+
+}
 
 /**
  * [contextual_view_modes_settings_form_submit description]
@@ -151,10 +198,9 @@ function contextual_view_modes_settings_form_submit($form, &$form_state) {
     foreach ($values['entity_fieldset_' . $entity_type]['container'] as $index => $group) {
 
       $entries = array_values($group['group']);
-      $uniq = array_diff($entries, array_diff_assoc($entries, array_unique($entries)));
 
-      // We need all three.
-      if (count($uniq) !== 3) {
+      // Check for the none option.
+      if (in_array('none', $entries)) {
         continue;
       }
 
