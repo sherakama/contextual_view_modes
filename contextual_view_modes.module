@@ -68,71 +68,36 @@ function contextual_view_modes_menu() {
 }
 
 /**
- * Implementation of hook_entity_view_alter().
+ * [contextual_view_modes_entity_view_mode_alter description]
+ * @param  [type] &$view_mode [description]
+ * @param  [type] $context    [description]
+ * @return [type]             [description]
  */
-function contextual_view_modes_entity_view_alter(&$build, $type) {
+function contextual_view_modes_entity_view_mode_alter(&$view_mode, $context) {
+
+  $entity_types = entity_get_info();
+  $type = $context['entity_type'];
+  $entity = $context['entity'];
 
   // We do not support comments at this time.
   if ($type == "comment") {
     return;
   }
 
-  $view_mode = FALSE;
-  // Don't want to cause infinite loops nor do we want extra processing.
-  $static = &drupal_static(__FUNCTION__, array());
-  $md5 = md5(serialize($build));
+  $node_view_mode = contextual_view_modes_evaluate_individual_options($entity, $type);
+  $global_view_mode = contextual_view_modes_evaluate_global_options($entity, $type);
 
-  if (in_array($md5, $static)) {
-    return;
+  if ($node_view_mode) {
+    $view_mode = $node_view_mode;
   }
-
-  // V is set. Dont mess with display suite.
-  if (module_exists('ds_extras') && isset($_GET['v'])) {
-    return;
+  elseif ($global_view_mode) {
+    $view_mode = $global_view_mode;
   }
-
-  $entity_types = entity_get_info();
-  // Define some things.
-  $langcode = isset($build['#language']) ? $build['#language'] : NULL;
-
-  // Something very wrong if the entity type does not exist.
-  if (!isset($entity_types[$type])) {
-    return;
-  }
-
-  // We are going to need this to continue.
-  $entity = contextual_view_modes_get_entity_from_build_array($build);
-
-  // If we don't find an entity then we just stop.
-  if (!$entity) {
-    return;
-  }
-
-  // Check to see if there is a individual entity setting.
-  $view_mode = contextual_view_modes_evaluate_individual_options($entity, $type);
-
-  // Check to see if there is a global option.
-  if (!$view_mode) {
-    $view_mode = contextual_view_modes_evaluate_global_options($entity, $type);
-  }
-
-  // Nothing found. Die die die.
-  if (!$view_mode) {
-    return;
-  }
-
-  // Rebuild the entity view...
-  $view_callback = $entity_types[$type]['view callback'];
-  if (function_exists($view_callback)) {
-    $static[] = $md5;
-    $wrapper = entity_metadata_wrapper($type, $entity);
-    $id = $wrapper->getIdentifier();
-    $build = $view_callback(array($id => $entity), $view_mode, $langcode, $type);
-  }
-
-  // Dance a little jig...
 
 }
+
+
+
 
 /**
  * [contextual_view_modes_evaluate_individual_options description]
