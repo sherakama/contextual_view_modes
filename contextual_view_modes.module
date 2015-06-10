@@ -5,7 +5,6 @@
  *
  **/
 
-
 /**
  * Implements hook_help().
  */
@@ -68,10 +67,15 @@ function contextual_view_modes_menu() {
 }
 
 /**
- * [contextual_view_modes_entity_view_mode_alter description]
- * @param  [type] &$view_mode [description]
- * @param  [type] $context    [description]
- * @return [type]             [description]
+ * This is the magic of this module.
+ *
+ * This hook allows us to evaluate the context conditions and trigger a change
+ * in view mode for the entity that is being rendered.
+ *
+ * @param string &$view_mode
+ *   The machine name of the view mode.
+ * @param array $context
+ *   An array of information surrounding the entity. Not the context module.
  */
 function contextual_view_modes_entity_view_mode_alter(&$view_mode, $context) {
 
@@ -84,11 +88,13 @@ function contextual_view_modes_entity_view_mode_alter(&$view_mode, $context) {
     return;
   }
 
-  $node_view_mode = contextual_view_modes_evaluate_individual_options($entity, $type);
+  // Evaluate global and local settings.
+  $entity_view_mode = contextual_view_modes_evaluate_individual_options($entity, $type);
   $global_view_mode = contextual_view_modes_evaluate_global_options($entity, $type);
 
-  if ($node_view_mode) {
-    $view_mode = $node_view_mode;
+  // If local setting use that first.
+  if ($entity_view_mode) {
+    $view_mode = $entity_view_mode;
   }
   elseif ($global_view_mode) {
     $view_mode = $global_view_mode;
@@ -96,14 +102,16 @@ function contextual_view_modes_entity_view_mode_alter(&$view_mode, $context) {
 
 }
 
-
-
-
 /**
- * [contextual_view_modes_evaluate_individual_options description]
- * @param  [type] $entity [description]
- * @param  [type] $type   [description]
- * @return [type]         [description]
+ * Evaluate an entity for a view mode setting.
+ *
+ * @param object $entity
+ *   The entity being evaluated.
+ * @param string $type
+ *   The bundle name.
+ *
+ * @return mixed
+ *   The machine name of the view mode setting on the entity or false.
  */
 function contextual_view_modes_evaluate_individual_options($entity, $type) {
   $entity_types = entity_get_info();
@@ -126,10 +134,15 @@ function contextual_view_modes_evaluate_individual_options($entity, $type) {
 }
 
 /**
- * [contextual_view_modes_evaluate_global_options description]
- * @param  [type] $entity [description]
- * @param  [type] $type   [description]
- * @return [type]         [description]
+ * Evaluate the view mode that should be displayed by the global options.
+ *
+ * @param object $entity
+ *   The entity being evaluated.
+ * @param string $type
+ *   The bundle name.
+ *
+ * @return mixed
+ *   The machine name of the view mode setting on the entity or false.
  */
 function contextual_view_modes_evaluate_global_options($entity, $type) {
 
@@ -151,41 +164,6 @@ function contextual_view_modes_evaluate_global_options($entity, $type) {
   }
 
   return FALSE;
-}
-
-/**
- * Returns the entity from the build array.
- *
- * This is special because I have not yet figured out how to get the name of the
- * entity without checking for specific types.
- *
- * @param array $build
- *   the build array from hook_entity_view_alter
- *
- * @return object
- *   The entity object.
- */
-function contextual_view_modes_get_entity_from_build_array($build = array()) {
-
-  // Now we need to pull the entity out of the build array. This can be fun.
-  $entity = isset($build['#entity']) ? $build['#entity'] : FALSE;
-
-  // Because nodes are special.
-  if (isset($build['#node'])) {
-    $entity = $build['#node'];
-  }
-
-  // Because terms are special.
-  elseif (isset($build['#term'])) {
-    $entity = $build['#term'];
-  }
-
-  // Because users are special.
-  elseif (isset($build['#account'])) {
-    $entity = $build['#account'];
-  }
-
-  return $entity;
 }
 
 /**
@@ -287,6 +265,58 @@ function contextual_view_modes_get_view_mode_options($entity_type = NULL) {
 }
 
 /**
+ * Implements hook_ctools_plugin_api().
+ *
+ * Make module compatible with context 3.x.
+ */
+function contextual_view_modes_ctools_plugin_api($module, $api) {
+  if ($module == 'context' && $api == 'plugins') {
+    return array('version' => 3);
+  }
+}
+
+/**
+ * Implements hook_context_plugins().
+ *
+ * To define your plugins, classes, and class hierarchy.
+ *
+ * @return array
+ *   An array of plugin information
+ */
+function contextual_view_modes_context_plugins() {
+  $plugins = array();
+  $plugins['context_reaction_view_mode'] = array(
+    'handler' => array(
+      'path' => drupal_get_path('module', 'contextual_view_modes') . '/plugins',
+      'file' => 'context_reaction.view_mode.inc',
+      'class' => 'context_reaction_view_mode',
+      'parent' => 'context_reaction',
+    ),
+  );
+  return $plugins;
+}
+
+/**
+ * Implements hook_context_registry().
+ *
+ * To define your conditions and/or reactions and map them to plugins.
+ *
+ * @return array
+ *   An array of configuration values.
+ */
+function contextual_view_modes_context_registry() {
+  return array(
+    'reactions' => array(
+      'context_reaction_view_mode' => array(
+        'title' => t('View Mode'),
+        'plugin' => 'context_reaction_view_mode',
+      ),
+    ),
+  );
+}
+
+
+/**
  * Helper/Wrapper function for context_active_contexts().
  * @return [type] [description]
  */
@@ -297,4 +327,13 @@ function contextual_view_modes_get_active_contexts() {
 
   // Get all of the contexts that have are active.
   return context_active_contexts();
+}
+
+/**
+ * Implementation of hook_context_page_reaction()
+ */
+function contextual_view_modes_context_page_reaction() {
+  if ($plugin = context_get_plugin('reaction', 'context_reaction_view_mode')) {
+    $plugin->execute();
+  }
 }
