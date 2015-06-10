@@ -67,6 +67,8 @@ class context_reaction_view_mode extends context_reaction {
    */
   function execute() {
     // Now what do I do?
+    $options = $this->fetch_from_context($context);
+
   }
 
 }
