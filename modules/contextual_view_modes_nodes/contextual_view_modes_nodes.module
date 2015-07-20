@@ -15,7 +15,7 @@ function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
     '#title' => t('Contextual View Modes'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-//    '#access' => user_access('set view modes per node'),
+    '#access' => user_access('set view modes per node'),
     '#group' => 'additional_settings',
     '#weight' => 100,
   );
