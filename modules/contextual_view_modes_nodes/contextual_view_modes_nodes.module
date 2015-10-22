@@ -148,6 +148,12 @@ function contextual_view_modes_nodes_node_insert($node) {
 function contextual_view_modes_nodes_node_update($node) {
   list($id, $vid, $bundle) = entity_extract_ids('node', $node);
   $settings = variable_get("contextual_view_modes_node", array());
+
+  // If cvm is not around just go away.
+  if (!isset($node->cvm)) {
+    return;
+  }
+
   $settings[$vid] = $node->cvm['grouping'];
   variable_set("contextual_view_modes_node", $settings);
 }
