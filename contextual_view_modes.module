@@ -145,9 +145,24 @@ function contextual_view_modes_evaluate_global_options($entity, $type) {
   // Loop through each context and see if this entity has a view mode assigned
   // to a valid context.
   foreach ($settings[$type] as $delta => $values) {
+
+    // If we have a bundle setting we should check the entity to it.
+    if (isset($values['bundle']) && !empty($values['bundle'])) {
+      $wrapper = entity_metadata_wrapper($type, $entity);
+      $bundle = $wrapper->getBundle();
+
+      // If the bundle does not match then no need to continue on.
+      if ($values['bundle'] !== $bundle) {
+        return FALSE;
+      }
+    }
+
+    // Bundle validation will have been completed already here.
+    // Now we check for matching contexts.
     if (in_array($values['context'], $keys)) {
       return $values['view_mode'];
     }
+
   }
 
   return FALSE;
