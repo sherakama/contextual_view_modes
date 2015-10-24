@@ -157,7 +157,7 @@ function contextual_view_modes_evaluate_global_options($entity, $type) {
 
       // If the bundle does not match then no need to continue on.
       if ($values['bundle'] !== $bundle) {
-        return FALSE;
+        continue;
       }
     }
 
