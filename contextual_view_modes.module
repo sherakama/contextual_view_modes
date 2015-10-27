@@ -147,40 +147,10 @@ function contextual_view_modes_evaluate_individual_options($entity, $type) {
  *   The machine name of the view mode setting on the entity or false.
  */
 function contextual_view_modes_evaluate_global_options($entity, $type) {
-
-  $settings = variable_get('contextual_view_modes_global', array());
-  $contexts = contextual_view_modes_get_active_contexts();
-  $keys = array_keys($contexts);
-
-  // Not valid.
-  if (!isset($settings[$type])) {
-    return;
+  $contexts = context_active_contexts();
+  if ($plugin = context_get_plugin('reaction', 'context_reaction_view_mode')) {
+    return $plugin->execute($entity, $type);
   }
-
-  // Loop through each context and see if this entity has a view mode assigned
-  // to a valid context.
-  foreach ($settings[$type] as $delta => $values) {
-
-    // If we have a bundle setting we should check the entity to it.
-    if (isset($values['bundle']) && !empty($values['bundle'])) {
-      $wrapper = entity_metadata_wrapper($type, $entity);
-      $bundle = $wrapper->getBundle();
-
-      // If the bundle does not match then no need to continue on.
-      if ($values['bundle'] !== $bundle) {
-        continue;
-      }
-    }
-
-    // Bundle validation will have been completed already here.
-    // Now we check for matching contexts.
-    if (in_array($values['context'], $keys)) {
-      return $values['view_mode'];
-    }
-
-  }
-
-  return FALSE;
 }
 
 /**
@@ -228,12 +198,17 @@ function contextual_view_modes_entity_get_view_mode($entity, $type) {
 
   list($id, $vid, $bundle) = entity_extract_ids($type, $entity);
 
-  // users have no vid.
+  // Users have no vid.
   if (is_null($vid) && $type == "user") {
     $vid = $id;
   }
 
-  $contexts = contextual_view_modes_get_active_contexts();
+  // Now just need to actually have this return something.
+  if ($plugin = context_get_plugin('reaction', 'view_mode')) {
+    $plugin->execute($entity, $type);
+  }
+
+  $contexts = context_enabled_contexts();
 
   // Get the variables for this entity.
   $settings = variable_get('contextual_view_modes_' . $type, array());
@@ -340,27 +315,4 @@ function contextual_view_modes_context_registry() {
       ),
     ),
   );
-}
-
-
-/**
- * Helper/Wrapper function for context_active_contexts().
- * @return [type] [description]
- */
-function contextual_view_modes_get_active_contexts() {
-
-  // To ensure these contexts get evaluated we need to call this directly.
-  module_invoke_all('context_page_condition');
-
-  // Get all of the contexts that have are active.
-  return context_active_contexts();
-}
-
-/**
- * Implementation of hook_context_page_reaction()
- */
-function contextual_view_modes_context_page_reaction() {
-  if ($plugin = context_get_plugin('reaction', 'context_reaction_view_mode')) {
-    $plugin->execute();
-  }
 }

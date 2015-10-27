@@ -65,10 +65,20 @@ class context_reaction_view_mode extends context_reaction {
    * [execute description]
    * @return [type] [description]
    */
-  function execute() {
-    // Now what do I do?
-    $options = $this->fetch_from_context($context);
+  function execute(&$entity, $type) {
+    $wrapped = entity_metadata_wrapper($type, $entity);
+    $bundle = $wrapped->getBundle();
 
+    $contexts = $this->get_contexts();
+    foreach ($contexts as $context) {
+      $options = $this->fetch_from_context($context);
+      if (!isset($options['entity_types'][$type][$bundle])) {
+        continue;
+      }
+      if ($options['entity_types'][$type][$bundle] !== "none") {
+        return $options['entity_types'][$type][$bundle];
+      }
+    }
   }
 
 }

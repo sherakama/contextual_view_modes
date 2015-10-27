@@ -3,7 +3,12 @@
 /**
  * Implements hook_form_alter().
  */
-function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
+function contextual_view_modes_nodes_form_alter(&$form, &$form_state, $form_id) {
+
+  // Only node edit forms.
+  if (!isset($form['#node_edit_form']) || !$form["#node_edit_form"]) {
+    return;
+  }
 
   // Node for the node edit.
   $node = isset($form['#node']) ? $form['#node'] : NULL;
