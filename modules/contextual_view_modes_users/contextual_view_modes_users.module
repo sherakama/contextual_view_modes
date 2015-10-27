@@ -3,11 +3,10 @@
 /**
  * Implements hook_form_alter().
  */
-function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
+function contextual_view_modes_users_form_user_profile_form_alter(&$form, &$form_state) {
 
-  // Node for the node edit.
-  $node = isset($form['#node']) ? $form['#node'] : NULL;
-  list($nid, $vid, $bundle) = entity_extract_ids('node', $node);
+  $user = isset($form['#user']) ? $form['#user'] : NULL;
+  list($uid) = entity_extract_ids('user', $user);
 
   // Add the view modes vertical tab.
   $form['contextual_view_modes'] = array(
@@ -15,13 +14,12 @@ function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
     '#title' => t('Contextual View Modes'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#access' => user_access('set view modes per node'),
-    '#group' => 'additional_settings',
-    '#weight' => 100,
+    '#access' => user_access('set view modes per user'),
+    '#weight' => 50,
   );
 
   $context_options = contextual_view_modes_get_context_options();
-  $view_modes_options = contextual_view_modes_get_view_mode_options('node');
+  $view_modes_options = contextual_view_modes_get_view_mode_options('user');
 
   $count_context = count($context_options);
 
@@ -32,7 +30,7 @@ function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
   }
 
   // If we have contexts explain how to use them.
-  $form['contextual_view_modes']['help']['#markup'] = "<p><b>" . t("Instructions") . ":</b><p>" . t("This module uses the context module in order to trigger the view mode change. First, create a context with the conditions you wish to trigger the view mode change with. For example, if I wanted to change the view mode of this node by wether or not the user was logged in I would create a context with the condition of user role of authenticated. There is no need to add anything to the reactions portion of the context configuration. From the options below you can then select the name of that context and the view mode you wish to display to authenticated users. You can create additional view modes using the display suite module.") . "</p>";
+  $form['contextual_view_modes']['help']['#markup'] = "<p><b>" . t("Instructions") . ":</b><p>" . t("This module uses the context module in order to trigger the view mode change. First, create a context with the conditions you wish to trigger the view mode change with. For example, if I wanted to change the view mode of this user by wether or not the user was logged in I would create a context with the condition of user role of authenticated. There is no need to add anything to the reactions portion of the context configuration. From the options below you can then select the name of that context and the view mode you wish to display to authenticated users. You can create additional view modes using the display suite module.") . "</p>";
 
   $form['contextual_view_modes']['cvm'] = array(
     '#type' => 'container',
@@ -42,10 +40,10 @@ function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
 
   // Convenience variable.
   $vm = &$form['contextual_view_modes']['cvm'];
-  $settings = variable_get("contextual_view_modes_node", array());
+  $settings = variable_get("contextual_view_modes_user", array());
 
   if (empty($form_state['num_contexts'])) {
-    $form_state['num_contexts'] = isset($settings[$vid]) ? count($settings[$vid]) : 0;
+    $form_state['num_contexts'] = isset($settings[$uid]) ? count($settings[$uid]) : 0;
   }
 
   for ($delta = 0; $delta <= $form_state['num_contexts']; $delta++) {
@@ -62,7 +60,7 @@ function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
       '#options' => $context_options,
       '#title' => t('Context'),
       '#description' => t("When this context is active and the condition are met display the view mode below."),
-      '#default_value' => isset($settings[$vid][$delta]['context_name']) ? $settings[$vid][$delta]['context_name'] : "",
+      '#default_value' => isset($settings[$uid][$delta]['context_name']) ? $settings[$uid][$delta]['context_name'] : "",
     );
 
     $vm['grouping'][$delta]['view_mode'] = array(
@@ -70,7 +68,7 @@ function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
       '#options' => $view_modes_options,
       '#title' => t('View mode'),
       '#description' => t("Display this view mode when the above context is active."),
-      '#default_value' => isset($settings[$vid][$delta]['view_mode']) ? $settings[$vid][$delta]['view_mode'] : "",
+      '#default_value' => isset($settings[$uid][$delta]['view_mode']) ? $settings[$uid][$delta]['view_mode'] : "",
     );
   }
 
@@ -78,16 +76,15 @@ function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Add another'),
     '#name' => 'add-nuther' . $delta,
-    '#submit' => array('contextual_view_modes_add_nuther'),
+    '#submit' => array('contextual_view_modes_user_add_nuther'),
     '#ajax' => array(
-      'callback' => 'contextual_view_modes_add_nuther_callback',
+      'callback' => 'contextual_view_modes_user_add_nuther_callback',
       'wrapper' => 'edit-cvm-wrapper',
     ),
   );
 
-  // Add new submit handlers to this form.
-  $form["#submit"][] = "contextual_view_modes_form_node_form_submit";
-
+  // Add new submit handlers to this form before the user is saved.
+  array_unshift($form["#submit"], "contextual_view_modes_user_form_user_form_submit");
 }
 
 
@@ -95,7 +92,7 @@ function contextual_view_modes_form_page_node_form_alter(&$form, &$form_state) {
  * [contextual_view_modes_add_nuther_callback description]
  * @return [type] [description]
  */
-function contextual_view_modes_add_nuther_callback($form, $form_state) {
+function contextual_view_modes_user_add_nuther_callback($form, $form_state) {
   return $form['contextual_view_modes']['cvm'];
 }
 
@@ -104,7 +101,7 @@ function contextual_view_modes_add_nuther_callback($form, $form_state) {
  *
  * Increments the max counter and causes a rebuild.
  */
-function contextual_view_modes_add_nuther($form, &$form_state) {
+function contextual_view_modes_user_add_nuther($form, &$form_state) {
   $form_state['num_contexts']++;
   $form_state['rebuild'] = TRUE;
 }
@@ -116,44 +113,42 @@ function contextual_view_modes_add_nuther($form, &$form_state) {
  * @param  [type] &$form_state [description]
  * @return [type]              [description]
  */
-function contextual_view_modes_form_node_form_submit($form, &$form_state) {
+function contextual_view_modes_user_form_user_form_submit($form, &$form_state) {
   $values = $form_state['values'];
 
   // Remove empty options.
   foreach ($values['cvm']['grouping'] as $delta => $settings) {
     if (empty($settings['context_name']) || $settings['context_name'] == "none") {
       unset($form_state['values']['cvm']['grouping'][$delta]);
+      unset($form_state['input']['cvm']['grouping'][$delta]);
+      continue;
     }
+
     if (empty($settings['view_mode']) || $settings['view_mode'] == "none") {
       unset($form_state['values']['cvm']['grouping'][$delta]);
+      unset($form_state['input']['cvm']['grouping'][$delta]);
     }
   }
 
   // Re-key the values to avoid any gaps.
   sort($form_state['values']['cvm']['grouping']);
-
+  $form_state['user']->cvm = $form_state['values']['cvm']['grouping'];
 }
 
 /**
- * Implements hook_node_insert().
+ * Implements hook_user_insert().
  */
-function contextual_view_modes_nodes_node_insert($node) {
-  contextual_view_modes_nodes_node_update($node);
+function contextual_view_modes_users_user_insert($user) {
+  contextual_view_modes_users_user_update($user);
 }
 
 
 /**
- * Implements hook_node_update().
+ * Implements hook_user_update().
  */
-function contextual_view_modes_nodes_node_update($node) {
-  list($id, $vid, $bundle) = entity_extract_ids('node', $node);
-  $settings = variable_get("contextual_view_modes_node", array());
-
-  // If cvm is not around just go away.
-  if (!isset($node->cvm)) {
-    return;
-  }
-
-  $settings[$vid] = $node->cvm['grouping'];
-  variable_set("contextual_view_modes_node", $settings);
+function contextual_view_modes_users_user_update($user) {
+  $uid = $user['original']->uid;
+  $settings = variable_get("contextual_view_modes_user", array());
+  $settings[$uid] = $user['cvm']['grouping'];
+  variable_set("contextual_view_modes_user", $settings);
 }

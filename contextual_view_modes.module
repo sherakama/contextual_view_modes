@@ -42,7 +42,11 @@ function contextual_view_modes_permission() {
     'set view modes per node' => array(
       'title' => t('Contextual View Modes Per Node'),
       'description' => t('Allow changing/setting contextual view mode per node'),
-    )
+    ),
+    'set view modes per user' => array(
+      'title' => t('Contextual View Modes Per User'),
+      'description' => t('Allow changing/setting contextual view mode per user'),
+    ),
   );
 
   return $perms;
@@ -88,11 +92,9 @@ function contextual_view_modes_entity_view_mode_alter(&$view_mode, $context) {
     return;
   }
 
-  // Evaluate global and local settings.
   $entity_view_mode = contextual_view_modes_evaluate_individual_options($entity, $type);
   $global_view_mode = contextual_view_modes_evaluate_global_options($entity, $type);
 
-  // If local setting use that first.
   if ($entity_view_mode) {
     $view_mode = $entity_view_mode;
   }
@@ -158,9 +160,24 @@ function contextual_view_modes_evaluate_global_options($entity, $type) {
   // Loop through each context and see if this entity has a view mode assigned
   // to a valid context.
   foreach ($settings[$type] as $delta => $values) {
+
+    // If we have a bundle setting we should check the entity to it.
+    if (isset($values['bundle']) && !empty($values['bundle'])) {
+      $wrapper = entity_metadata_wrapper($type, $entity);
+      $bundle = $wrapper->getBundle();
+
+      // If the bundle does not match then no need to continue on.
+      if ($values['bundle'] !== $bundle) {
+        continue;
+      }
+    }
+
+    // Bundle validation will have been completed already here.
+    // Now we check for matching contexts.
     if (in_array($values['context'], $keys)) {
       return $values['view_mode'];
     }
+
   }
 
   return FALSE;
@@ -187,6 +204,11 @@ function contextual_view_modes_is_valid_entity($entity, $entity_type) {
 
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
+  // Users do not have a $vid so it will return null. Swap it for the id.
+  if (is_null($vid)) {
+    $vid = $id;
+  }
+
   $settings = variable_get("contextual_view_modes_" . $entity_type);
 
   // If there is an entry for the entity id return true.
@@ -205,6 +227,11 @@ function contextual_view_modes_is_valid_entity($entity, $entity_type) {
 function contextual_view_modes_entity_get_view_mode($entity, $type) {
 
   list($id, $vid, $bundle) = entity_extract_ids($type, $entity);
+
+  // users have no vid.
+  if (is_null($vid) && $type == "user") {
+    $vid = $id;
+  }
 
   $contexts = contextual_view_modes_get_active_contexts();
 

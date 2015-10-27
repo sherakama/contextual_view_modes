@@ -1,0 +1,8 @@
+name = Contextual View Modes Users
+description = Provides the UI for contextual view modes user authoring.
+package = Contextual View Modes
+version = "7.x-2.x"
+core = 7.x
+
+dependencies[] = "user"
+dependencies[] = "contextual_view_modes"
