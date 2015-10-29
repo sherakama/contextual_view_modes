@@ -70,6 +70,7 @@ class context_reaction_view_mode extends context_reaction {
     $bundle = $wrapped->getBundle();
 
     $contexts = $this->get_contexts();
+
     foreach ($contexts as $context) {
       $options = $this->fetch_from_context($context);
       if (!isset($options['entity_types'][$type][$bundle])) {
