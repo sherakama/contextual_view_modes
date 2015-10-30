@@ -1,6 +1,21 @@
 <?php
 
 /**
+ * Implementation of hook_perm().
+ */
+function contextual_view_modes_permission() {
+
+  $perms = array(
+    'set view modes per node' => array(
+      'title' => t('Contextual View Modes Per Node'),
+      'description' => t('Allow changing/setting contextual view mode per node'),
+    ),
+  );
+
+  return $perms;
+}
+
+/**
  * Implements hook_form_alter().
  */
 function contextual_view_modes_nodes_form_alter(&$form, &$form_state, $form_id) {

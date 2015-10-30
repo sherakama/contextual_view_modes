@@ -1,6 +1,21 @@
 <?php
 
 /**
+ * Implementation of hook_perm().
+ */
+function contextual_view_modes_permission() {
+
+  $perms = array(
+    'set view modes per user' => array(
+      'title' => t('Contextual View Modes Per User'),
+      'description' => t('Allow changing/setting contextual view mode per user'),
+    ),
+  );
+
+  return $perms;
+}
+
+/**
  * Implements hook_form_alter().
  */
 function contextual_view_modes_users_form_user_profile_form_alter(&$form, &$form_state) {

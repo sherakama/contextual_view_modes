@@ -81,3 +81,10 @@ function contextual_view_modes_update_7102(&$sandbox) {
 function contextual_view_modes_update_7200($node) {
   // @Todo: provide upgrade path from 1.x to 2.x
 }
+
+/**
+ * Implements hook_update().
+ */
+function contextual_view_modes_update_7300($node) {
+  // @Todo: provide upgrade path from 2.x to 3.x
+}

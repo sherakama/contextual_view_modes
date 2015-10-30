@@ -12,14 +12,7 @@ function contextual_view_modes_help($path, $arg) {
   switch ($path) {
     case 'admin/help#contextual_view_modes':
       $help = '<p>' . t('Please submit help requests and issues to the !link.', array('!link' => l("Druapl.org issue queue", 'https://www.drupal.org/project/contextual_view_modes/'))) . '</p>';
-      $help .= "<h2>" . t("Global entity contextual view mode form") . "</h2>";
-      $help .= "<p>" . t("The global entity configuration form can be found !here.", array("!here" => l("here", 'admin/structure/cvm'))) . "</p>";
-      $help .= "<p>" . t("To use this form follow these steps:") . "</p>";
-      $help .= "<p>" . t("Create a context. You will need a context with atleast one condition available to evaluate against. For example: you can create a context with a condition for where the user role is anoymous.") . "</p>";
-      $help .= "<p>" . t("Expand entity type to reveal configuration options. For example, if you click on node the field will expand to show you the options available.") . "</p>";
-      $help .= "<p>" . t("Select type. Choose the context type or bundle type you want to change the view mode of. For example, under nodes you can select article.") . "</p>";
-      $help .= "<p>" . t("Select context. Choose a context from the drop down select options. For example, if you created an anonymous user context, the name of that context should appear in the drop down.") . "</p>";
-      $help .= "<p>" . t("") . "</p>";
+      $help .= "<p>" . t("For more help, please se the !readme", array('!readme' => l("README.md", drupal_get_path("module", "contextual_view_modes") . "/README.md"))) . "</p>";
       $help .= "<p>" . t("") . "</p>";
       $help .= "<p>" . t("") . "</p>";
       $help .= "<p>" . t("") . "</p>";
@@ -27,29 +20,6 @@ function contextual_view_modes_help($path, $arg) {
       $help .= "<p>" . t("") . "</p>";
       return $help;
   }
-}
-
-/**
- * Implementation of hook_perm().
- */
-function contextual_view_modes_permission() {
-
-  $perms = array(
-    'administer cvm settings' => array(
-      'title' => t('Administer Contextual View Modes'),
-      'description' => t('Allow administration of contextual view mode settings'),
-    ),
-    'set view modes per node' => array(
-      'title' => t('Contextual View Modes Per Node'),
-      'description' => t('Allow changing/setting contextual view mode per node'),
-    ),
-    'set view modes per user' => array(
-      'title' => t('Contextual View Modes Per User'),
-      'description' => t('Allow changing/setting contextual view mode per user'),
-    ),
-  );
-
-  return $perms;
 }
 
 /**
