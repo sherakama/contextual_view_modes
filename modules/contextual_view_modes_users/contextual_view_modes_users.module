@@ -3,7 +3,7 @@
 /**
  * Implementation of hook_perm().
  */
-function contextual_view_modes_permission() {
+function contextual_view_modes_users_permission() {
 
   $perms = array(
     'set view modes per user' => array(
@@ -17,6 +17,9 @@ function contextual_view_modes_permission() {
 
 /**
  * Implements hook_form_alter().
+ *
+ * Adds options for view mode switching to the user edit form.
+ *
  */
 function contextual_view_modes_users_form_user_profile_form_alter(&$form, &$form_state) {
 
@@ -33,12 +36,12 @@ function contextual_view_modes_users_form_user_profile_form_alter(&$form, &$form
     '#weight' => 50,
   );
 
+  // Gather information.
   $context_options = contextual_view_modes_get_context_options();
   $view_modes_options = contextual_view_modes_get_view_mode_options('user');
 
-  $count_context = count($context_options);
-
   // If there are no contexts available than let the user know.
+  $count_context = count($context_options);
   if ($count_context <= 1) {
     $vm['nothing']['#markup'] = "<p>" . t("Please %context_link before using contextual view modes.", array("%context_link" => l('create a context', 'admin/structure/context/add'))) . "</p>";
     return;
@@ -47,6 +50,7 @@ function contextual_view_modes_users_form_user_profile_form_alter(&$form, &$form
   // If we have contexts explain how to use them.
   $form['contextual_view_modes']['help']['#markup'] = "<p><b>" . t("Instructions") . ":</b><p>" . t("This module uses the context module in order to trigger the view mode change. First, create a context with the conditions you wish to trigger the view mode change with. For example, if I wanted to change the view mode of this user by wether or not the user was logged in I would create a context with the condition of user role of authenticated. There is no need to add anything to the reactions portion of the context configuration. From the options below you can then select the name of that context and the view mode you wish to display to authenticated users. You can create additional view modes using the display suite module.") . "</p>";
 
+  // Wrapper for ajax return easyness.
   $form['contextual_view_modes']['cvm'] = array(
     '#type' => 'container',
     '#id' => "edit-cvm-wrapper",
@@ -57,12 +61,15 @@ function contextual_view_modes_users_form_user_profile_form_alter(&$form, &$form
   $vm = &$form['contextual_view_modes']['cvm'];
   $settings = variable_get("contextual_view_modes_user", array());
 
+  // Keep count of how many options there is set for the add another functions.
   if (empty($form_state['num_contexts'])) {
     $form_state['num_contexts'] = isset($settings[$uid]) ? count($settings[$uid]) : 0;
   }
 
+  // Loop through and create form groups.
   for ($delta = 0; $delta <= $form_state['num_contexts']; $delta++) {
 
+    // Grouping like settings for easy saving.
     $vm['grouping'][$delta] = array(
       '#type' => 'fieldset',
       '#title' => t('Condition #') . ($delta + 1),
@@ -104,8 +111,15 @@ function contextual_view_modes_users_form_user_profile_form_alter(&$form, &$form
 
 
 /**
- * [contextual_view_modes_add_nuther_callback description]
- * @return [type] [description]
+ * Renders the part of the form for the ajax callback.
+ *
+ * @param array $form
+ *   The form array
+ * @param  array $form_state
+ *   The form state array.
+ *
+ * @return array
+ *   The contextual view mode vertical tab portion of the form.
  */
 function contextual_view_modes_user_add_nuther_callback($form, $form_state) {
   return $form['contextual_view_modes']['cvm'];
@@ -115,6 +129,11 @@ function contextual_view_modes_user_add_nuther_callback($form, $form_state) {
  * Submit handler for the "add-one-more" button.
  *
  * Increments the max counter and causes a rebuild.
+
+ * @param array $form
+ *   The form array
+ * @param  array $form_state
+ *   The form state array.
  */
 function contextual_view_modes_user_add_nuther($form, &$form_state) {
   $form_state['num_contexts']++;
@@ -123,12 +142,16 @@ function contextual_view_modes_user_add_nuther($form, &$form_state) {
 
 
 /**
- * Validate and remove bad merge groupings
- * @param  [type] $form        [description]
- * @param  [type] &$form_state [description]
- * @return [type]              [description]
+ * Validate and remove bad merge groupings then save.
+ *
+ * @param array $form
+ *   The form array
+ * @param  array $form_state
+ *   The form state array.
  */
 function contextual_view_modes_user_form_user_form_submit($form, &$form_state) {
+
+  // Form submit values.
   $values = $form_state['values'];
 
   // Remove empty options.
@@ -152,6 +175,11 @@ function contextual_view_modes_user_form_user_form_submit($form, &$form_state) {
 
 /**
  * Implements hook_user_insert().
+ *
+ * Pass through to update.
+ *
+ * @param  Object $user
+ *   The user object about to be saved.
  */
 function contextual_view_modes_users_user_insert($user) {
   contextual_view_modes_users_user_update($user);
@@ -160,10 +188,31 @@ function contextual_view_modes_users_user_insert($user) {
 
 /**
  * Implements hook_user_update().
+ *
+ * Merge in the settings for the user on save.
+ *
+ * @param  Object $user
+ *   The user object about to be saved.
+ *
  */
 function contextual_view_modes_users_user_update($user) {
   $uid = $user['original']->uid;
   $settings = variable_get("contextual_view_modes_user", array());
   $settings[$uid] = $user['cvm']['grouping'];
   variable_set("contextual_view_modes_user", $settings);
+}
+
+/**
+ * Implements hook_user_delete().
+ *
+ * Delete the contextual view mode settings for the node.
+ *
+ */
+function contextual_view_modes_users_user_delete($account) {
+  $id = $account->uid;
+  $settings = variable_get("contextual_view_modes_user", array());
+  if (isset($settings[$id])) {
+    unset($settings[$id]);
+    variable_set("contextual_view_modes_user", $settings);
+  }
 }

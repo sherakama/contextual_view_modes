@@ -1,7 +1,6 @@
 name = Contextual View Modes Nodes
 description = Provides the UI for contextual view modes node authoring.
 package = Contextual View Modes
-version = "7.x-2.x"
 core = 7.x
 
 dependencies[] = "node"

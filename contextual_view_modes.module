@@ -1,9 +1,4 @@
 <?php
-/**
- * @file
- * @author - sherakama
- *
- **/
 
 /**
  * Implements hook_help().
@@ -40,9 +35,7 @@ function contextual_view_modes_entity_view_mode_alter(&$view_mode, $context) {
   // Lets try to fire them. But only once.
   $static = &drupal_static(__FUNCTION__, FALSE);
   if (!$static) {
-
     module_invoke_all('context_page_condition');
-
     $static = TRUE;
   }
 

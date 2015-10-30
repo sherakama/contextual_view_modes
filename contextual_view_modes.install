@@ -1,27 +1,6 @@
 <?php
 
 /**
- * Implements hook_enable().
- * Create a field for use later
- */
-function contextual_view_modes_install() {
-
-}
-
-/**
- * Implements hook_disable().
- */
-function contextual_view_modes_disable() {
-}
-
-/**
- * Implements hook_uninstall().
- */
-function contextual_view_modes_uninstall() {
-
-}
-
-/**
  * Implements hook_update().
  */
 function contextual_view_modes_update_7101(&$sandbox) {
