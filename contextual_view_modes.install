@@ -61,7 +61,7 @@ function contextual_view_modes_update_7102(&$sandbox) {
  * - Convert global settings into new format
  * - Enable contextual view modes nodes ui module
  */
-function contextual_view_modes_update_7200($node) {
+function contextual_view_modes_update_7200(&$sandbox) {
 
   // Enable the contextual view modes nodes module.
   module_enable(
@@ -153,8 +153,26 @@ function contextual_view_modes_update_7200($node) {
 }
 
 /**
- * Implements hook_update().
+ * Change the global contextual view mode settings in to
+ * a real context reaction on the contexts they were set to.
  */
-function contextual_view_modes_update_7300($node) {
-  // @Todo: provide upgrade path from 2.x to 3.x
+function contextual_view_modes_update_7300(&$sandbox) {
+
+  // Get the settings from the previous version.
+  $settings = variable_get("contextual_view_modes_global", array());
+  if (empty($settings)) {
+    return;
+  }
+
+  // Loop through the settings and attach them to a context.
+  foreach ($settings as $entity_type => $more) {
+    foreach ($more as $delta => $variables) {
+      $context = context_load($variables['context']);
+      $context->reactions["context_reaction_view_mode"]["entity_types"][$entity_type][$variables["bundle"]] = $variables["view_mode"];
+      context_save($context);
+    }
+  }
+
+  variable_del("contextual_view_modes_global");
+
 }
