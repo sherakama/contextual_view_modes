@@ -20,12 +20,8 @@ function contextual_view_modes_nodes_permission() {
  *
  * Adds a vertical tab to node forms for selecting contexts and view modes.
  */
-function contextual_view_modes_nodes_form_alter(&$form, &$form_state, $form_id) {
 
-  // Only node edit forms.
-  if (!isset($form['#node_edit_form']) || !$form["#node_edit_form"]) {
-    return;
-  }
+function contextual_view_modes_nodes_form_node_form_alter(&$form, &$form_state) {
 
   // Node for the node edit.
   $node = isset($form['#node']) ? $form['#node'] : NULL;
