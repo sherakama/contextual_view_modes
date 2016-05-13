@@ -1,5 +1,5 @@
 assets:     
-  - dev.sql.gz
+  - db.sql.gz
 steps:
   - name: Probo CI site setup
     plugin: Drupal
