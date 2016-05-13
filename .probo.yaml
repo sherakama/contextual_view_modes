@@ -10,7 +10,7 @@ steps:
   - name: Copy settings.php
     plugin: Shell
     command: "cp /var/www/html/sites/default.settings.php /var/www/html/sites/settings.php"
- - name: Probo CI site setup
+  - name: Probo CI site setup
     plugin: Drupal
     database: db.sql.gz
     databaseGzipped: true
