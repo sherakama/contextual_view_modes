@@ -19,6 +19,9 @@ steps:
   - name: Revert all features
     plugin: Shell
     command: 'drush --root="/var/www/html" fra -y'
+  - name: Update all the things
+    plugin: Shell
+    command: 'drush --root="/var/www/html" updb -y'
   - name: Clear cache
     plugin: Shell
     command: 'drush --root="/var/www/html" cc all -y'
