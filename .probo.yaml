@@ -3,7 +3,7 @@ assets:
 steps:
   - name: Download Drupal 7
     plugin: Shell
-    command: "drush dl drupal-7.x --destination=/var/www/html"
+    command: "drush dl drupal-7.x --destination=/var/www"
   - name: Rename web dir
     plugin: Shell
     command: "mv /var/www/drupal-7.x-dev /var/www/html"
