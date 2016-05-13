@@ -1,7 +1,16 @@
 assets:     
   - db.sql.gz
 steps:
-  - name: Probo CI site setup
+  - name: Download Drupal 7
+    plugin: Shell
+    command: "drush dl drupal-7.x --destination=/var/www/html"
+  - name: Rename web dir
+    plugin: Shell
+    command: "mv /var/www/drupal-7.x-dev /var/www/html"
+  - name: Copy settings.php
+    plugin: Shell
+    command: "cp /var/www/html/sites/default.settings.php /var/www/html/sites/settings.php"
+ - name: Probo CI site setup
     plugin: Drupal
     database: db.sql.gz
     databaseGzipped: true
