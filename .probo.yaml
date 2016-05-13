@@ -2,3 +2,5 @@ steps:
   - name: Test Connection
     plugin: Shell
     command: 'print "Hello World!"'
+assets:
+  - dev.sql.gz
