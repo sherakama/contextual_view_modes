@@ -1,7 +1,9 @@
 steps:
   - name: Download Drupal 7
     plugin: Shell
-    command: "drush dl drupal-7.x --destination=/var/www/html"
+    command: "drush dl drupal-7.x --destination=/var/www/"
+  - name: Rename web dir
+    command: "mv /var/www/drupal-7.x-dev /var/www/html"
   - name: Make Module Dirs
     plugin: Shell
     command: "mkdir /var/www/html/sites/all/modules/contrib && mkdir /var/www/html/sites/all/modules/contrib/contextual_view_modes"
