@@ -5,7 +5,6 @@ core = 7.x
 
 files[] = contextual_view_modes.module
 files[] = contextual_view_modes.install
-files[] = contextual_view_modes.admin.inc
 
 dependencies[] = "context"
 dependencies[] = "entity"
